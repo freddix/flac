@@ -1,12 +1,15 @@
+# based on PLD Linux spec git://git.pld-linux.org/packages/.git
 Summary:	Free Lossless Audio Codec
 Name:		flac
-Version:	1.2.1
-Release:	13
+Version:	1.3.0
+Release:	1
 License:	GPL/LGPL
 Group:		Libraries
-Source0:	http://heanet.dl.sourceforge.net/flac/%{name}-%{version}.tar.gz
-# Source0-md5:	153c8b15a54da428d1f0fadc756c22c7
+Source0:	http://downloads.xiph.org/releases/flac/%{name}-%{version}.tar.xz
+# Source0-md5:	13b5c214cee8373464d3d65dee362cdd
 URL:		http://flac.sourceforge.net/
+Patch0:		%{name}-divby0.patch
+Patch1:		%{name}-realloc.patch
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	gettext-devel
@@ -30,6 +33,7 @@ FLAC++ - C++ API for FLAC codec.
 Summary:	FLAC - development files
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
+Requires:	libogg-devel
 
 %description devel
 The package contains the development header files for FLAC libraries.
@@ -39,14 +43,18 @@ Summary:	FLAC++ - development files
 Group:		Development/Libraries
 Requires:	%{name}-c++ = %{version}-%{release}
 Requires:	%{name}-devel = %{version}-%{release}
+Requires:	libstdc++-devel
 
 %description c++-devel
-The package contains the development header files for FLAC++ libraries.
+The package contains the development header files for FLAC++
+libraries.
 
 %prep
 %setup -q
+%patch0 -p1
+%patch1 -p1
 
-sed -i -e 's|examples ||g' Makefile.am
+%{__sed} -i -e 's|examples ||g' Makefile.am
 
 %build
 %{__libtoolize}
@@ -54,6 +62,7 @@ sed -i -e 's|examples ||g' Makefile.am
 %{__automake}
 %{__autoconf}
 %configure \
+	--disable-silent-rules	\
 	--disable-static	\
 	--disable-xmms-plugin
 %{__make}
@@ -64,8 +73,10 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-# no makefiles in doc dirs
-#rm -f doc/html/{Makefile*,images/Makefile*,ru/Makefile*}
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/*.la
+
+%check
+%{__make} check
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -79,7 +90,6 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc AUTHORS README doc/html/{*.html,images}
-%lang(ru) %doc doc/html/ru
 %attr(755,root,root) %{_bindir}/*
 %attr(755,root,root) %ghost %{_libdir}/libFLAC.so.?
 %attr(755,root,root) %{_libdir}/libFLAC.so.*.*.*
@@ -93,7 +103,6 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libFLAC.so
-%{_libdir}/libFLAC.la
 %{_includedir}/FLAC
 %{_aclocaldir}/libFLAC.m4
 %{_pkgconfigdir}/flac.pc
@@ -101,7 +110,6 @@ rm -rf $RPM_BUILD_ROOT
 %files c++-devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libFLAC++.so
-%{_libdir}/libFLAC++.la
 %{_includedir}/FLAC++
 %{_aclocaldir}/libFLAC++.m4
 %{_pkgconfigdir}/flac++.pc
