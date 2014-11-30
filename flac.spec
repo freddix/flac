@@ -1,15 +1,14 @@
 # based on PLD Linux spec git://git.pld-linux.org/packages/.git
 Summary:	Free Lossless Audio Codec
 Name:		flac
-Version:	1.3.0
+Version:	1.3.1
 Release:	1
 License:	GPL/LGPL
 Group:		Libraries
 Source0:	http://downloads.xiph.org/releases/flac/%{name}-%{version}.tar.xz
-# Source0-md5:	13b5c214cee8373464d3d65dee362cdd
+# Source0-md5:	b9922c9a0378c88d3e901b234f852698
+Patch0:		%{name}-cflags.patch
 URL:		http://flac.sourceforge.net/
-Patch0:		%{name}-divby0.patch
-Patch1:		%{name}-realloc.patch
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	gettext-devel
@@ -51,8 +50,8 @@ libraries.
 
 %prep
 %setup -q
+# broken substitution
 %patch0 -p1
-%patch1 -p1
 
 %{__sed} -i -e 's|examples ||g' Makefile.am
 
